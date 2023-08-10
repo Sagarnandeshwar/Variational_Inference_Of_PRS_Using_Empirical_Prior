@@ -1,5 +1,5 @@
 # Variational_Inference_Of_PRS_Using_Empirical_Prior
-In continuation of project: .  
+In continuation of project: https://github.com/Sagarnandeshwar/Variational_Inference_Of_Bayesian_Linear_Regression
 In this project, we will explore the usefulness of empirical prior in PRS i.e. estimated from real-world data rather than being predefined based on theoretical assumptions. Empirical priors can capture the actual distribution of genetic effects observed in the population, allowing for more accurate and data-driven inference 
 
 ## Motivation: 
@@ -22,9 +22,13 @@ be the binary indicator for whether SNP j is in annotation k, i.e., j ∈ $C_k$,
 Let w ∈ $R^{K×1}$ be the unknown annotation weights, $σ_k^2$ the variance explained by SNP j if it is in annotation k, and β and s be the effect size and binary indicator variables of causal SNPs, respectively.
 Together, we have the following data generative process.
 
+![theory](https://github.com/Sagarnandeshwar/Variational_Inference_Of_PRS_Using_Empirical_Prior/blob/main/images/model.png)
+
 
 ### Algorithm:  
-I modify the the codes from , by implementing by implementing the updates of point estimates for the annotation weights w ∈ $R^{K×1}$ and the point estimates for the variance explained per annotation k: $σ_k^2$ = $τ_k^{−1}$ for k ∈ {1, . . . ,K}. To achieve that, you will follow the Expectation-Maximization (EM) algorithm (aka Empirical Bayes) outlined in Algorithm 1. The algorithm is similar to the original VIPRS you implemented in A3 but with the changes highlighted in red to incorporate the functional priors. Equations (6) and (7) were derived by taking the partial derivative of the ELBO w.r.t. $τ_k$ and w, respectively. Make sure you know how to derive them. Because of the logistic function, there is no closed-form update for w. Instead, we perform gradient ascent in (7) with some fixed learning rate η. Equation (5) is optional. You may fix it to 1 if you have trouble of convergence.
+I modify the the codes from https://github.com/Sagarnandeshwar/Variational_Inference_Of_Bayesian_Linear_Regression, by implementing by implementing the updates of point estimates for the annotation weights w ∈ $R^{K×1}$ and the point estimates for the variance explained per annotation k: $σ_k^2$ = $τ_k^{−1}$ for k ∈ {1, . . . ,K}. To achieve that, you will follow the Expectation-Maximization (EM) algorithm (aka Empirical Bayes) outlined in Algorithm 1. The algorithm is similar to the original VIPRS you implemented in A3 but with the changes highlighted in red to incorporate the functional priors. Equations (6) and (7) were derived by taking the partial derivative of the ELBO w.r.t. $τ_k$ and w, respectively. Make sure you know how to derive them. Because of the logistic function, there is no closed-form update for w. Instead, we perform gradient ascent in (7) with some fixed learning rate η. Equation (5) is optional. You may fix it to 1 if you have trouble of convergence.
+
+![em](https://github.com/Sagarnandeshwar/Variational_Inference_Of_PRS_Using_Empirical_Prior/blob/main/images/em.png)
 
 ## Dataset: 
 
@@ -46,17 +50,17 @@ For each of the two LD matrix (ch21 and ch21) For each of the five fold
    mergy simultaneous harmonize data all the three dataset
 2. Use numpy to create array for
    - per snps data
-      - μβj*
-      - τβj*
-      - τβ
+      - $μ_{β_j}^*$
+      - $τ_{β_j}^*$
+      - $τ_β$
       - π
-      - γj*
+      - $γ_j^*$
    - per annotation data
-     - τk
+     - $τ_k$
      - w
 3. Run the EM algorithm for 10 iterations with
    - Learning rate = 0.001
-   - τϵ = 1,0
+   - $τ_ϵ$ = 1,0
 4. Use mergepy to load testing marginal beta
 5. match the testing Marginal beta with training Marginal beta
 6. Compute the R square
@@ -68,18 +72,24 @@ We use R-squared to evaluate how your trained model performs on the correspondin
 R-squared measures the proportion of the variance in the dependent variable that is explained by the independent variable(s) included in the model. R-squared values range from 0 to 1, with a value of 1 indicating that the model explains 100% of the variation in the dependent variable and a value of 0 indicating that the model explains none of the variation. 
 
 Assuming standardized phenotype, the R-squared on testing fold can be computed by summary statistics: 
+![r2](https://github.com/Sagarnandeshwar/Variational_Inference_Of_PRS_Using_Empirical_Prior/blob/main/images/r2.png)
 
 We performed 5-fold cross-validation by training and evaluating your model on the training and testing fold with the same index and repeat your experiments 5 times to compute standard error of the R-squared estimates for each method. 
 
 ### Evidence lower bound 
 
 The evidence lower bound (ELBO) of the model is:  
+![elbo](https://github.com/Sagarnandeshwar/Variational_Inference_Of_PRS_Using_Empirical_Prior/blob/main/images/elbo.png)
 More specifically,  
-where $γ_j^*$ , $μ_j^*$ , and $τ_j$ are the inferred PIP, mean and precision of the effect size for SNP j at the E-step, respectively; ◦ is the elementwise product of two vectors. 
+![elbo](https://github.com/Sagarnandeshwar/Variational_Inference_Of_PRS_Using_Empirical_Prior/blob/main/images/elbos.png)
+where $γ_j^*$ , $μ_j^*$ and $τ_j$ are the inferred PIP, mean and precision of the effect size for SNP j at the E-step, respectively; ◦ is the elementwise product of two vectors. 
 
 I have also implemented the LELBO for the model, but due to computational limitation, I am unable to run it for the whole data. 
 
 ## Result 
+![result](https://github.com/Sagarnandeshwar/Variational_Inference_Of_PRS_Using_Empirical_Prior/blob/main/images/1.png)
+![result](https://github.com/Sagarnandeshwar/Variational_Inference_Of_PRS_Using_Empirical_Prior/blob/main/images/2.png)
+![result](https://github.com/Sagarnandeshwar/Variational_Inference_Of_PRS_Using_Empirical_Prior/blob/main/images/3.png)
 I was able to implement the EM algorithm for VIPRS and performed 5-fold cross-validation by training and evaluating your model on the training and testing fold by computing standard error of the R-squared estimates for each method for both chromosomes ch21 and ch22 sets in an efficient way with the help of magenpy and numpy. Within the same chromosomes group the r square values are very similar, however we see that the model performs slightly better when trained with LD of chromosomes ch21 than ch22. All the R square values observed are low. This may be due to small sample space, biased initial values or because of the hyperparameter selection. 
 
 ## Discussion 
